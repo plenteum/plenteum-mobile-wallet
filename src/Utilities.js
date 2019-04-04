@@ -6,11 +6,21 @@ import React from 'react';
 
 import moment from 'moment';
 
-import { Text, Platform, ToastAndroid } from 'react-native';
+import { Text, Platform, ToastAndroid, Alert } from 'react-native';
 
 import { StackActions, NavigationActions } from 'react-navigation';
 
+import {
+    validateAddresses, WalletErrorCode, validatePaymentID, prettyPrintAmount,
+} from 'turtlecoin-wallet-backend';
+
+import * as Qs from 'query-string';
+
 import Config from './Config';
+
+import { Globals } from './Globals';
+
+import { addFee, toAtomic } from './Fee';
 
 export function delay(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms));
@@ -94,4 +104,200 @@ export function getArrivalTime() {
     } else {
         return Config.blockTargetTime + ' seconds!';
     }
+}
+
+export function handleURI(data, navigation) {
+    const result = parseURI(data);
+
+    if (!result.valid) {
+        Alert.alert(
+            'Cannot send transaction',
+            result.error,
+            [
+                {text: 'OK'},
+            ]
+        );
+    } else {
+        /* Hop into the transfer stack */
+        navigation.navigate('Transfer');
+        /* Then navigate to the nested route, if needed */
+        navigation.navigate(result.suggestedAction, {...result});
+    }
+}
+
+export function parseURI(qrData) {
+    /* It's a URI, try and get the data from it */
+    if (qrData.startsWith(Config.uriPrefix)) {
+        /* Remove the turtlecoin:// prefix */
+        let data = qrData.replace(Config.uriPrefix, '');
+
+        const index = data.indexOf('?');
+
+        /* Not valid URI */
+        if (index === -1) {
+            index = data.length;
+        }
+
+        const address = data.substr(0, index);
+        const params = Qs.parse(data.substr(index));
+
+        const amount = params.amount;
+        const name = params.name;
+        let paymentID = params.paymentid;
+
+        if (paymentID) {
+            const pidError = validatePaymentID(paymentID);
+
+            /* Payment ID isn't valid. */
+            if (pidError.errorCode !== WalletErrorCode.SUCCESS) {
+                return {
+                    valid: false,
+                    error: 'QR Code is invalid',
+                };
+            }
+
+            /* Both integrated address and payment ID given */
+            if (address.length === Config.integratedAddressLength && paymentID.length !== 0) {
+                return {
+                    valid: false,
+                    error: 'QR Code is invalid',
+                };
+            }
+        }
+
+        const addressError = validateAddresses([address], true);
+
+        /* Address isn't valid */
+        if (addressError.errorCode !== WalletErrorCode.SUCCESS) {
+            return {
+                valid: false,
+                error: 'QR Code is invalid',
+            };
+        }
+
+        const amountAtomic = Number(amount);
+        let feeInfo = undefined;
+        let amountNonAtomic = undefined;
+
+        if (!isNaN(amountAtomic)) {
+            amountNonAtomic = amountAtomic / (10 ** Config.decimalPlaces);
+
+            /* Got an amount, can go straight to confirmation, if we have enough balance */
+            const [unlockedBalance, lockedBalance] = Globals.wallet.getBalance();
+
+            feeInfo = addFee(amountNonAtomic);
+
+            let [valid, error] = validAmount(feeInfo.original, unlockedBalance);
+
+            if (feeInfo.originalAtomic > unlockedBalance) {
+                error = 'Not enough funds available! Needed (including fees): ' +
+                        `${prettyPrintAmount(feeInfo.originalAtomic)}, Available: ` +
+                        prettyPrintAmount(unlockedBalance);
+            }
+
+            if (!valid) {
+                return {
+                    valid: false,
+                    error,
+                };
+            }
+        }
+        
+        /* No name, need to pick one.. */
+        if (!name) {
+            return {
+                paymentID: paymentID || '',
+                address,
+                amount: amountNonAtomic ? amountNonAtomic.toString() : undefined,
+                suggestedAction: 'NewPayee',
+                valid: true,
+            }
+        }
+
+        const newPayee = {
+            nickname: name,
+            address: address,
+            paymentID: paymentID || '',
+        }
+
+        const existingPayee = Globals.payees.find((p) => p.nickname === name);
+        
+        /* Payee exists already */
+        if (existingPayee) {
+            /* New payee doesn't match existing payee, get them to enter a new name */
+            if (existingPayee.address !== newPayee.address ||
+                existingPayee.paymentID !== newPayee.paymentID) { 
+                return {
+                    paymentID: paymentID || '',
+                    address,
+                    amount: amountNonAtomic.toString(),
+                    suggestedAction: 'NewPayee',
+                    valid: true,
+                };
+            }
+        /* Save payee to database for later use */
+        } else {
+            Globals.addPayee(newPayee);
+        }
+
+        if (!amount) {
+            return {
+                payee: newPayee,
+                suggestedAction: 'Transfer',
+                valid: true,
+            };
+        } else {
+            return {
+                payee: newPayee,
+                amount: feeInfo,
+                suggestedAction: 'Confirm',
+                valid: true,
+            };
+        }
+    /* It's a standard address, try and parse it (or something else) */
+    } else {
+        const addressError = validateAddresses([qrData], true);
+
+        if (addressError.errorCode !== WalletErrorCode.SUCCESS) {
+            return {
+                valid: false,
+                error: 'QR code is invalid',
+            };
+        }
+
+        return {
+            valid: true,
+            address: qrData,
+            suggestedAction: 'NewPayee',
+        }
+    }
+}
+
+export function validAmount(amount, unlockedBalance) {
+    if (amount === '' || amount === undefined || amount === null) {
+        return [false, ''];
+    }
+
+    /* Remove commas in input */
+    amount = amount.replace(/,/g, '');
+
+    let numAmount = Number(amount);
+
+    if (isNaN(numAmount)) {
+        return [false, 'Amount is not a number!'];
+    }
+
+    /* Remove fractional component and convert to atomic */
+    numAmount = Math.floor(toAtomic(numAmount));
+
+    /* Must be above min send */
+    if (numAmount < 1) {
+        return [false, 'Amount is below minimum send!'];
+    }
+
+    if (numAmount > unlockedBalance) {
+        return [false, 'Not enough funds available!'];
+    }
+
+    return [true, ''];
 }

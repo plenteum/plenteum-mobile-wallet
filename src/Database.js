@@ -1,4 +1,4 @@
-// Copyright (C) 2018, Zpalmtree
+// Copyright (C) 2018-2019, Zpalmtree
 //
 // Please see the included LICENSE file for more information.
 
@@ -12,6 +12,8 @@ import Config from './Config';
 import Constants from './Constants';
 
 import { Globals } from './Globals';
+
+import { reportCaughtException } from './Sentry';
 
 function getPriceDataSchema() {
     var obj = {
@@ -156,6 +158,7 @@ const PreferencesSchema = {
         scanCoinbaseTransactions: 'bool',
         limitData: 'bool',
         theme: 'string',
+        pinConfirmation: 'bool',
     }
 }
 
@@ -166,6 +169,26 @@ const PayeeSchema = {
         nickname: 'string',
         address: 'string',
         paymentID: 'string',
+    }
+}
+
+const TransactionDetailsSchema = {
+    name: 'TransactionDetails',
+    privateKey: 'hash',
+    properties: {
+        hash: 'string',
+        memo: 'string',
+        address: 'string',
+        payee: 'string',
+    }
+}
+
+const CompactSchema = {
+    name: 'CompactionInfo',
+    primaryKey: 'primaryKey',
+    properties: {
+        primaryKey: 'int',
+        lastUpdated: 'date',
     }
 }
 
@@ -344,138 +367,137 @@ function realmToWalletJSON(realmObj) {
     return JSON.stringify(json);
 }
 
-export function savePreferencesToDatabase(preferences) {
+export async function savePreferencesToDatabase(preferences) {
     preferences['primaryKey'] = 1;
 
-    Realm.open({
-        schema: [PreferencesSchema],
-        path: 'Preferences.realm',
-        deleteRealmIfMigrationNeeded: true,
-    }).then(realm => {
-        realm.write(() => {
-            return realm.create('Preferences', preferences, true);
-        });
-    }).catch(err => {
-        Globals.logger.addLogMessage('Failed to save preferences to DB: ' + err);
-    });
+    withDB(
+        [PreferencesSchema],
+        'Preferences.realm',
+        async (realm) => {
+            await realm.write(() => {
+                return realm.create('Preferences', preferences, true);
+            });
+        }
+    );
 }
 
 export async function loadPreferencesFromDatabase() {
-    try {
-        let realm = await Realm.open({
-            schema: [PreferencesSchema],
-            path: 'Preferences.realm',
-            deleteRealmIfMigrationNeeded: true,
-        });
+    return withDB(
+        [PreferencesSchema],
+        'Preferences.realm',
+        (realm) => {
+            if (realm.objects('Preferences').length > 0) {
+                return JSON.parse(JSON.stringify(realm.objects('Preferences')[0]));
+            }
 
-        if (realm.objects('Preferences').length > 0) {
-            return JSON.parse(JSON.stringify(realm.objects('Preferences')[0]));
+            return undefined;
         }
-
-        return undefined;
-
-    } catch (err) {
-        Globals.logger.addLogMessage('Error loading preferences from database: ' + err);
-        return undefined;
-    }
+    );
 }
 
-export function savePriceDataToDatabase(priceData) {
+export async function savePriceDataToDatabase(priceData) {
     priceData['primaryKey'] = 1;
 
-    Realm.open({
-        schema: [getPriceDataSchema()],
-        path: 'PriceData.realm',
-        deleteRealmIfMigrationNeeded: true,
-    }).then(realm => {
-        realm.write(() => {
-            return realm.create('PriceData', priceData, true);
-        });
-    }).catch(err => {
-        Globals.logger.addLogMessage('Failed to save price data to DB: ' + err);
-    });
+    withDB(
+        [getPriceDataSchema()],
+        'PriceData.realm',
+        async (realm) => {
+            await realm.write(() => {
+                return realm.create('PriceData', priceData, true);
+            });
+        }
+    );
 }
 
 export async function loadPriceDataFromDatabase() {
-    try {
-        let realm = await Realm.open({
-            schema: [getPriceDataSchema()],
-            path: 'PriceData.realm',
-            deleteRealmIfMigrationNeeded: true,
-        });
+    return withDB(
+        [getPriceDataSchema()],
+        'PriceData.realm',
+        (realm) => {
+            if (realm.objects('PriceData').length > 0) {
+                return JSON.parse(JSON.stringify(realm.objects('PriceData')[0]));
+            }
 
-        if (realm.objects('PriceData').length > 0) {
-            return JSON.parse(JSON.stringify(realm.objects('PriceData')[0]));
+            return undefined;
         }
-
-        return undefined;
-
-    } catch (err) {
-        Globals.logger.addLogMessage('Error loading database: ' + err);
-        return undefined;
-    }
+    );
 }
 
 /**
  * Note - saves a single payee to the DB, which contains many payees
  */
-export function savePayeeToDatabase(payee) {
-    Realm.open({
-        schema: [PayeeSchema],
-        path: 'PayeeData.realm',
-        deleteRealmIfMigrationNeeded: true,
-    }).then(realm => {
-        realm.write(() => {
-            return realm.create('Payee', payee, true);
-        });
-    }).catch(err => {
-        Globals.logger.addLogMessage('Failed to save payee data to DB: ' + err);
-    });
+export async function savePayeeToDatabase(payee) {
+    withDB(
+        [PayeeSchema],
+        'PayeeData.realm',
+        async (realm) => {
+            await realm.write(() => {
+                return realm.create('Payee', payee, true);
+            });
+        }
+    );
+}
+
+export async function removePayeeFromDatabase(nickname) {
+    withDB(
+        [PayeeSchema],
+        'PayeeData.realm',
+        async (realm) => {
+            const payee = realm.objects('Payee').filtered('nickname = $0', nickname);
+
+            if (payee.length > 0) {
+                await realm.write(() => {
+                    realm.delete(payee);
+                });
+            }
+        }
+    );
 }
 
 export async function loadPayeeDataFromDatabase() {
-    try {
-        let realm = await Realm.open({
-            schema: [PayeeSchema],
-            path: 'PayeeData.realm',
-            deleteRealmIfMigrationNeeded: true,
-        });
+    return withDB(
+        [PayeeSchema],
+        'PayeeData.realm',
+        (realm) => {
+            if (realm.objects('Payee').length > 0) {
+                /* Has science gone too far? */
+                return realm.objects('Payee').map((x) => JSON.parse(JSON.stringify((x))));
+            }
 
-        if (realm.objects('Payee').length > 0) {
-            /* Has science gone too far? */
-            return realm.objects('Payee').map((x) => JSON.parse(JSON.stringify((x))));
+            return undefined;
         }
-
-        return undefined;
-
-    } catch (err) {
-        Globals.logger.addLogMessage('Error loading payee data from database: ' + err);
-        return undefined;
-    }
+    );
 }
 
-export function saveToDatabase(wallet, pinCode) {
+export async function saveToDatabase(wallet, pinCode) {
     /* Get encryption key from pin code */
     var key = sha512.arrayBuffer(pinCode.toString());
 
-    /* Open the DB */
-    Realm.open({
-        schema: [
-            WalletSchema, WalletSynchronizerSchema, SubWalletSchema,
-            TransactionSchema, SubWalletsSchema, TxPrivateKeysSchema,
-            TransfersSchema, TransactionInputSchema, UnconfirmedInputSchema,
-            SynchronizationStatusSchema
-        ],
-        encryptionKey: key,
-    }).then(realm => {
-        /* Write the wallet to the DB, overwriting old wallet */
-        realm.write(() => {
-            walletToRealm(wallet, realm)
-            setHaveWallet(true);
-        })
-    }).catch(err => {
+    try {
+        /* Open the DB */
+        const realm = await Realm.open({
+            schema: [
+                WalletSchema, WalletSynchronizerSchema, SubWalletSchema,
+                TransactionSchema, SubWalletsSchema, TxPrivateKeysSchema,
+                TransfersSchema, TransactionInputSchema, UnconfirmedInputSchema,
+                SynchronizationStatusSchema
+            ],
+            encryptionKey: key,
+        });
+
+        try {
+            /* Write the wallet to the DB, overwriting old wallet */
+            await realm.write(() => {
+                walletToRealm(wallet, realm)
+                setHaveWallet(true);
+            })
+        } finally {
+            realm.close();
+        }
+    } catch (err) {
+        reportCaughtException(err);
         Globals.logger.addLogMessage('Err saving wallet: ' + err);
-    });
+    };
 }
 
 export async function loadFromDatabase(pinCode) {
@@ -492,14 +514,19 @@ export async function loadFromDatabase(pinCode) {
             encryptionKey: key,
         });
 
-        if (realm.objects('Wallet').length > 0) {
-            return realmToWalletJSON(realm.objects('Wallet')[0]);
+        try {
+            if (realm.objects('Wallet').length > 0) {
+                return [realmToWalletJSON(realm.objects('Wallet')[0]), undefined];
+            }
+        } finally {
+            realm.close();
         }
 
-        return undefined;
+        return [undefined, 'Wallet not present in database'];
     } catch(err) {
+        reportCaughtException(err);
         Globals.logger.addLogMessage('Error loading database: ' + err);
-        return undefined;
+        return [undefined, err];
     }
 }
 
@@ -513,6 +540,7 @@ export async function haveWallet() {
 
         return false;
     } catch (error) {
+        reportCaughtException(error);
         Globals.logger.addLogMessage('Error determining if we have data: ' + error);
         return false;
     }
@@ -522,6 +550,177 @@ export async function setHaveWallet(haveWallet) {
     try {
         await AsyncStorage.setItem(Config.coinName + 'HaveWallet', haveWallet.toString());
     } catch (error) {
+        reportCaughtException(error);
         Globals.logger.addLogMessage('Failed to save have wallet status: ' + error);
     }
+}
+
+/**
+ * Note - saves a single transactiondetails to the DB, which contains many payees
+ */
+export async function saveTransactionDetailsToDatabase(details) {
+    withDB(
+        [TransactionDetailsSchema],
+        'TransactionDetailsData.realm',
+        async (realm) => {
+            await realm.write(() => {
+                return realm.create('TransactionDetails', details, true);
+            });
+        }
+    );
+}
+
+export async function removeTransactionDetailsFromDatabase(hash) {
+    withDB(
+        [TransactionDetailsSchema],
+        'TransactionDetailsData.realm',
+        async (realm) => {
+            const details = realm.objects('TransactionDetails').filtered('hash = $0', hash);
+
+            if (details.length > 0) {
+                await realm.write(() => {
+                    realm.delete(details);
+                });
+            }
+        }
+    );
+}
+
+export function loadTransactionDetailsFromDatabase() {
+    return withDB(
+        [TransactionDetailsSchema],
+        'TransactionDetailsData.realm',
+        (realm) => {
+            if (realm.objects('TransactionDetails').length > 0) {
+                /* Has science gone too far? */
+                return realm.objects('TransactionDetails').map((x) => JSON.parse(JSON.stringify((x))));
+            }
+
+            return undefined;
+        }
+    );
+}
+
+export function saveLastUpdatedToDatabase(date) {
+    const data = {
+        lastUpdated: date,
+        primaryKey: 0,
+    }
+
+    withDB(
+        [CompactSchema],
+        'CompactionInfo.realm',
+        async (realm) => {
+            await realm.write(() => {
+                return realm.create('CompactionInfo', data, true);
+            });
+        }
+    );
+}
+
+export function loadLastUpdatedFromDatabase() {
+    return withDB(
+        [CompactSchema],
+        'CompactionInfo.realm',
+        (realm) => {
+            if (realm.objects('CompactionInfo').length > 0) {
+                return new Date(realm.objects('CompactionInfo')[0].lastUpdated);
+            }
+
+            return new Date(0);
+        }
+    ) || new Date(0);
+}
+
+async function withDB(schema, path, func, deleteIfMigrationNeeded) {
+    try {
+        let realm = await Realm.open({
+            schema: schema,
+            path: path,
+            deleteRealmIfMigrationNeeded: deleteIfMigrationNeeded === undefined ? true : deleteIfMigrationNeeded,
+        });
+
+        try {
+            return await func(realm);
+        } finally {
+            realm.close();
+        }
+    } catch (err) {
+        reportCaughtException(err);
+        Globals.logger.addLogMessage('Error interacting with DB: ' + err);
+        return undefined;
+    }
+}
+
+export async function compactDBs(pinCode) {
+    Globals.logger.addLogMessage('Attempting to compact DB...');
+
+    var key = sha512.arrayBuffer(pinCode.toString());
+
+    try {
+        await withDB(
+            [TransactionDetailsSchema],
+            'TransactionDetailsData.realm',
+            (realm) => {
+                realm.compact();
+            }
+        );
+
+        await withDB(
+            [PayeeSchema],
+            'PayeeData.realm',
+            (realm) => {
+                realm.compact();
+            }
+        );
+
+        await withDB(
+            [getPriceDataSchema()],
+            'PriceData.realm',
+            (realm) => {
+                realm.compact();
+            }
+        );
+
+        await withDB(
+            [PreferencesSchema],
+            'Preferences.realm',
+            (realm) => {
+                realm.compact();
+            }
+        );
+
+        let realm = await Realm.open({
+            schema: [
+                WalletSchema, WalletSynchronizerSchema, SubWalletSchema,
+                TransactionSchema, SubWalletsSchema, TxPrivateKeysSchema,
+                TransfersSchema, TransactionInputSchema, UnconfirmedInputSchema,
+                SynchronizationStatusSchema
+            ],
+            encryptionKey: key,
+        });
+
+        try {
+            realm.compact();
+        } finally {
+            realm.close();
+        }
+    } catch (err) {
+        Globals.logger.addLogMessage('Failed to compact DBs: ' + err);
+        return false;
+    }
+
+    return true;
+}
+
+export async function shouldCompactDB(requiredDayDifference) {
+    const lastCompacted = await loadLastUpdatedFromDatabase();
+
+    const now = new Date();
+
+    const actualDayDifference = Math.floor(
+        (now.getTime() - lastCompacted.getTime()) / (1000 * 3600 * 24)
+    );
+
+    return actualDayDifference > requiredDayDifference;
 }

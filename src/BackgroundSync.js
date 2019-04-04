@@ -9,7 +9,10 @@ import { AppState, Platform, NetInfo } from 'react-native';
 import Config from './Config';
 
 import { Globals } from './Globals';
-import { saveToDatabase } from './Database';
+
+import {
+    saveToDatabase, compactDBs, shouldCompactDB, saveLastUpdatedToDatabase
+} from './Database';
 
 /* Note: headless/start on boot not enabled, since we don't have the pin
    to decrypt the users wallet, when fetching from DB */
@@ -106,6 +109,16 @@ export async function backgroundSync() {
 
     let secsRunning = 0;
 
+    /* More than 24 hours have passed since last compaction */
+    if (await shouldCompactDB(1)) {
+        const success = await compactDBs(Globals.pinCode);
+
+        if (success) {
+            saveLastUpdatedToDatabase(new Date());
+            Globals.logger.addLogMessage('[Background Sync] Compaction completed successfully');
+        }
+    }
+
     /* Run for 25 seconds or until the app comes back to the foreground */
     while (!State.shouldStop && secsRunning < allowedRunTime) {
 
@@ -130,7 +143,11 @@ export async function backgroundSync() {
                 break;
             }
 
-            await Globals.wallet.internal().sync(false);
+            const syncedBlocks = await Globals.wallet.internal().sync(false);
+
+            if (!syncedBlocks) {
+                break;
+            }
         }
 
         Globals.logger.addLogMessage('[Background Sync] Saving wallet in background.');

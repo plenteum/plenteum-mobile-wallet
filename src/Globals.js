@@ -2,13 +2,17 @@
 //
 // Please see the included LICENSE file for more information.
 
+import * as _ from 'lodash';
+
 import { NetInfo, Alert } from 'react-native';
 
 import { Logger } from './Logger';
 import { getCoinPriceFromAPI } from './Currency';
 
 import {
-    saveToDatabase, loadPreferencesFromDatabase, loadPayeeDataFromDatabase
+    saveToDatabase, loadPreferencesFromDatabase, loadPayeeDataFromDatabase,
+    savePayeeToDatabase, removePayeeFromDatabase,
+    loadTransactionDetailsFromDatabase, saveTransactionDetailsToDatabase,
 } from './Database';
 
 class globals {
@@ -32,12 +36,18 @@ class globals {
             scanCoinbaseTransactions: false,
             limitData: false,
             theme: 'darkMode',
+            pinConfirmation: false,
         };
 
         /* People in our address book */
         this.payees = [];
 
         this.logger = new Logger();
+
+        this.updatePayeeFunctions = [];
+
+        /* Mapping of tx hash to address sent, payee name, memo */
+        this.transactionDetails = [];
     }
 
     reset() {
@@ -47,6 +57,29 @@ class globals {
         this.logger = new Logger();
 
         NetInfo.removeEventListener('connectionChange', updateConnection);
+    }
+
+    addTransactionDetails(txDetails) {
+        Globals.transactionDetails.push(txDetails);
+        saveTransactionDetailsToDatabase(txDetails);
+    }
+
+    addPayee(payee) {
+        Globals.payees.push(payee);
+        savePayeeToDatabase(payee);
+        this.update();
+    }
+
+    removePayee(nickname) {
+        _.remove(Globals.payees, (item) => item.nickname === nickname);
+        removePayeeFromDatabase(nickname);
+        this.update();
+    }
+
+    update() {
+        Globals.updatePayeeFunctions.forEach((f) => {
+            f();
+        });
     }
 }
 
@@ -68,11 +101,17 @@ export async function initGlobals() {
     if (payees !== undefined) {
         Globals.payees = payees;
     }
+
+    const transactionDetails = await loadTransactionDetailsFromDatabase();
+
+    if (transactionDetails !== undefined) {
+        Globals.transactionDetails = transactionDetails;
+    }
     
     const netInfo = NetInfo.getConnectionInfo();
 
     /* Start syncing */
-    if ((Globals.preferences.limitData && connection.type === 'cellular')) {
+    if ((Globals.preferences.limitData && netInfo.type === 'cellular')) {
         Alert.alert(
             'Not Syncing',
             'You enabled data limits, and are on a limited connection. Not starting sync.',

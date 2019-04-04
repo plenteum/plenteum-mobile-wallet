@@ -10,4 +10,8 @@ import './shim';
 
 import App from './src/App';
 
+import { initSentry } from './src/Sentry';
+
+initSentry();
+
 AppRegistry.registerComponent(appName, () => App);

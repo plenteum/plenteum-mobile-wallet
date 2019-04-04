@@ -1,6 +1,6 @@
 # TonChan - A mobile, native TurtleCoin wallet
 
-![Screenshot](https://i.imgur.com/MbZxkdu.png)
+![Screenshot](https://i.imgur.com/F5LMYKl.png)
 
 ## Setup
 
@@ -145,6 +145,8 @@ Note that you need to close the emulator to get the `yarn deploy-android` to ins
 
 ## Forking
 
+Start by cloning the latest tagged release. If it's not in a release, it has not been fully tested, and may have bugs.
+
 #### Modifying icon
 
 Replace `assets/img/icon.png` with your icon image. Make sure it is 1024x1024.
@@ -157,12 +159,36 @@ When it asks for the name of your react-native project, enter `TonChan`
 
 #### Renaming app
 
+There is a tool that does this, `react-native-rename`. However, the native code, (`android/app/src/main/jni/TurtleCoin.cpp`) needs the name of the class to find the Java/C++ interface.
+
+If you use this tool, you will probably need to update that code.
+
 Run `npm install -g react-native-rename` (You may need to run this with sudo)
 
-Run `react-native-name your-new-project-name` from this directory. (Obviously, replace with the desired name)
+Run `react-native-rename your-new-project-name` from this directory. (Obviously, replace with the desired name)
 
 This might confuse the build system. You probably should do this before installing.
 
+#### Building an APK
+
+You will need to set up your signing key, and keystore file. See https://facebook.github.io/react-native/docs/signed-apk-android.html#generating-a-signing-key
+
 #### Config
 
-Edit `config.js`. The fields should be self explanatory. Make sure to recompile.
+Edit `src/Config.js`. The fields should be self explanatory. Make sure to recompile.
+
+#### Sentry
+
+Sentry is a tool to report crashes in the application. *Please* configure this, or disable it, so we do not get reported errors for your application.
+
+Remove the two files `android/sentry.properties` and `ios/sentry.properties`, and then run `react-native link`. 
+
+This will run the sentry setup wizard, to setup error reporting for your app.
+
+Then, copy the line of code `Sentry.config('https://8ecf138e1d1e4d558178be3f2b5e1925@sentry.io/1411753').install();` that is shown on the configuration page, and replace with our line in `src/Sentry.js`.
+
+Your API key will be different, don't just copy the one here.
+
+Finally, replace `Config.coinName === 'TurtleCoin'` in `src/Sentry.js` with the coin name defined in the config.
+
+Once you've done that, you can test sentry is working by adding something like `throw new Error('Hello, sentry');` in the mainscreen constructor.

@@ -4,6 +4,7 @@
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Entypo from 'react-native-vector-icons/Entypo';
+import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
 
 import React from 'react';
 
@@ -21,13 +22,14 @@ import { Globals } from './Globals';
 import { MainScreen } from './MainScreen';
 import { SplashScreen } from './SplashScreen';
 import { DisclaimerScreen } from './DisclaimerScreen';
-import { SetPinScreen, RequestPinScreen } from './Pin';
 import { loadPreferencesFromDatabase } from './Database';
+import { ModifyPayeeScreen, RecipientsScreen } from './Recipients';
 import { WalletOptionScreen, CreateWalletScreen } from './CreateScreen';
+import { SetPinScreen, RequestPinScreen, ForgotPinScreen } from './Pin';
 import { TransactionsScreen, TransactionDetailsScreen } from './TransactionsScreen';
 
 import {
-    SettingsScreen, SwapCurrencyScreen, ExportKeysScreen, LoggingScreen,
+    SettingsScreen, SwapCurrencyScreen, ExportKeysScreen, LoggingScreen, FaqScreen,
 } from './SettingsScreen';
 
 import {
@@ -81,6 +83,7 @@ const TransferNavigator = createStackNavigator(
         Confirm: ConfirmScreen,
         QrScanner: QrScannerScreen,
         SendTransaction: SendTransactionScreen,
+        RequestPin: RequestPinScreen,
     },
     {
         initialRouteName: 'ChoosePayee',
@@ -106,6 +109,9 @@ const SettingsNavigator = createStackNavigator(
         SwapCurrency: SwapCurrencyScreen,
         ExportKeys: ExportKeysScreen,
         Logging: LoggingScreen,
+        Faq: FaqScreen,
+        RequestPin: RequestPinScreen,
+        ForgotPin: ForgotPinScreen,
     },
     {
         initialRouteName: 'Settings',
@@ -130,12 +136,42 @@ SettingsNavigator.navigationOptions = ({ navigation, screenProps }) => ({
     }
 });
 
+const RecipientNavigator = createStackNavigator(
+    {
+        Recipients: RecipientsScreen,
+        ModifyPayee: ModifyPayeeScreen,
+        NewPayee: NewPayeeScreen,
+    },
+    {
+        initialRouteName: '',
+        headerLayoutPreset: 'center',
+        defaultNavigationOptions: {
+            headerTitleStyle: {
+                fontWeight: 'bold',
+                color: Themes.darkMode.primaryColour,
+            },
+            headerTransparent: true,
+            headerTintColor: Themes.darkMode.primaryColour,
+        },
+    }
+);
+
+RecipientNavigator.navigationOptions = ({ navigation, screenProps }) => ({
+    tabBarOptions: {
+        activeBackgroundColor: screenProps.theme.backgroundColour,
+        inactiveBackgroundColor: screenProps.theme.backgroundColour,
+        activeTintColor: screenProps.theme.primaryColour,
+        inactiveTintColor: screenProps.theme.slightlyMoreVisibleColour,
+    }
+});
+
 /* Main screen for a logged in wallet */
 const HomeNavigator = createBottomTabNavigator(
     {
         Main: MainScreen,
-        Transfer: TransferNavigator,
         Transactions: TransactionNavigator,
+        Transfer: TransferNavigator,
+        Recipients: RecipientNavigator,
         Settings: SettingsNavigator, 
     },
     {
@@ -159,6 +195,9 @@ const HomeNavigator = createBottomTabNavigator(
                 } else if (routeName === 'Transfer') {
                     IconComponent = Ionicons;
                     iconName = 'ios-send';
+                } else if (routeName === 'Recipients') {
+                    IconComponent = SimpleLineIcons;
+                    iconName = 'people';
                 } else if (routeName === 'Settings') {
                     IconComponent = Ionicons;
                     iconName = 'ios-settings';
@@ -181,6 +220,9 @@ const LoginNavigator = createStackNavigator(
 
         /* Request the pin for an existing wallet */
         RequestPin: RequestPinScreen,
+
+        /* Allow deleting the wallet if pin forgotten */
+        ForgotPin: ForgotPinScreen,
 
         /* Launcing screen */
         Splash: SplashScreen,

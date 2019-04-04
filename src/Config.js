@@ -211,12 +211,23 @@ const Config = {
     /**
      * Displayed in the settings screen
      */
-    appVersion: 'v0.0.1',
+    appVersion: 'v0.0.8',
 
     /**
      * Base URL for us to chuck a hash on the end, and find a transaction
      */
     explorerBaseURL: 'http://block-explorer.plenteum.com/?hash='
+
+    /**
+     * A link to your app on the Apple app store. Currently blank because we
+     * haven't released for iOS yet...
+     */
+    appStoreLink: '',
+
+    /**
+     * A link to your app on the google play store
+     */
+    googlePlayLink: 'https://play.google.com/store/apps/details?id=com.plenteum.wallet',
 };
 
 module.exports = Config;
