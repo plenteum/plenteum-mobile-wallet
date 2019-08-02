@@ -19,12 +19,12 @@ import java.net.URL;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-public class PlenteumModule extends ReactContextBaseJavaModule {
+public class TurtleCoinModule extends ReactContextBaseJavaModule {
     static {
         System.loadLibrary("Plenteum_jni");
     }
 
-    public PlenteumModule(ReactApplicationContext reactContext) {
+    public TurtleCoinModule(ReactApplicationContext reactContext) {
         super(reactContext); //required by React Native
     }
 
