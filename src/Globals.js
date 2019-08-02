@@ -12,8 +12,7 @@ import { Logger } from './Logger';
 import { getCoinPriceFromAPI } from './Currency';
 
 import {
-    saveToDatabase, loadPreferencesFromDatabase, loadPayeeDataFromDatabase,
-    savePayeeToDatabase, removePayeeFromDatabase,
+    loadPayeeDataFromDatabase, savePayeeToDatabase, removePayeeFromDatabase,
     loadTransactionDetailsFromDatabase, saveTransactionDetailsToDatabase,
 } from './Database';
 
@@ -21,9 +20,6 @@ class globals {
     constructor() {
         /* Can't really pass wallet between tab screens, and need it everywhere */
         this.wallet = undefined;
-
-        /* Need pincode so we can save wallet */
-        this.pinCode = undefined;
 
         /* Need to be able to cancel the background saving if we make a new wallet */
         this.backgroundSaveTimer = undefined;
@@ -38,7 +34,9 @@ class globals {
             scanCoinbaseTransactions: false,
             limitData: false,
             theme: 'darkMode',
-            pinConfirmation: false,
+            authConfirmation: false,
+            autoOptimize: true,
+            authenticationMethod: 'hardware-auth',
         };
 
         /* People in our address book */

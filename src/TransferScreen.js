@@ -4,6 +4,8 @@
 
 import React from 'react';
 
+import * as Animatable from 'react-native-animatable';
+
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
 
@@ -17,11 +19,11 @@ import { HeaderBackButton, StackActions } from 'react-navigation';
 
 import {
     validateAddresses, WalletErrorCode, validatePaymentID, prettyPrintAmount,
-} from 'plenteum-wallet-backend';
+} from 'turtlecoin-wallet-backend';
 
 import {
     View, Text, TextInput, TouchableWithoutFeedback, FlatList, Platform,
-    ScrollView, Clipboard, Alert,
+    ScrollView, Clipboard,
 } from 'react-native';
 
 import { Input, Button } from 'react-native-elements';
@@ -32,6 +34,7 @@ import List from './ListContainer';
 
 import { Styles } from './Styles';
 import { Globals } from './Globals';
+import { Authenticate } from './Authenticate';
 import { Hr, BottomButton } from './SharedComponents';
 import { removeFee, toAtomic, fromAtomic, addFee } from './Fee';
 
@@ -1021,15 +1024,16 @@ export class ConfirmScreen extends React.Component {
                             memo: this.state.memo,
                         };
 
-                        if (Globals.preferences.pinConfirmation) {
+                        if (Globals.preferences.authConfirmation) {
                             /* Verify they have the correct pin, then send the actual TX */
-                            this.props.navigation.navigate('RequestPin', {
-                                subtitle: 'to confirm the transaction',
-                                finishFunction: () => {
+                            Authenticate(
+                                this.props.navigation,
+                                'to confirm the transaction',
+                                () => {
                                     this.props.navigation.dispatch(navigateWithDisabledBack('ChoosePayee'));
                                     this.props.navigation.navigate('SendTransaction', {...params});
                                 }
-                            });
+                            );
                         } else {
                             /* Reset this stack to be on the transfer screen */
                             this.props.navigation.dispatch(navigateWithDisabledBack('ChoosePayee'));
@@ -1224,24 +1228,32 @@ export class SendTransactionScreen extends React.Component {
     render() {
         const sending =
             <View>
-                <Text style={{
-                    color: this.props.screenProps.theme.primaryColour,
-                    fontSize: 25,
-                }}>
+                <Animatable.Text
+                    style={{
+                        color: this.props.screenProps.theme.primaryColour,
+                        fontSize: 25,
+                    }}
+                    animation='pulse'
+                    iterationCount='infinite'
+                >
                     Sending transaction, please wait...
-                </Text>
+                </Animatable.Text>
             </View>;
 
         const fail =
             <View>
-                <Text style={{
-                    color: 'red',
-                    fontSize: 25,
-                    marginBottom: 25,
-                    fontWeight: 'bold',
-                }}>
+                <Animatable.Text
+                    style={{
+                        color: 'red',
+                        fontSize: 25,
+                        marginBottom: 25,
+                        fontWeight: 'bold',
+                    }}
+                    animation='shake'
+                    delay={1000}
+                >
                     Transaction failed!
-                </Text>
+                </Animatable.Text>
 
                 <Text style={{ fontSize: 13 }}>
                     {this.state.errMsg}
@@ -1250,14 +1262,17 @@ export class SendTransactionScreen extends React.Component {
 
         const success =
             <View>
-                <Text style={{
-                    color: this.props.screenProps.theme.primaryColour,
-                    fontSize: 25,
-                    marginBottom: 25,
-                    fontWeight: 'bold'
-                }}>
+                <Animatable.Text style={{
+                        color: this.props.screenProps.theme.primaryColour,
+                        fontSize: 25,
+                        marginBottom: 25,
+                        fontWeight: 'bold'
+                    }}
+                    animation='tada'
+                    delay={1000}
+                >
                     Transaction complete
-                </Text>
+                </Animatable.Text>
 
                 <Text style={{ fontSize: 13, color: this.props.screenProps.theme.slightlyMoreVisibleColour }}>
                     <Text style={{ color: this.props.screenProps.theme.primaryColour, fontWeight: 'bold' }}>

@@ -6,6 +6,8 @@ import React from 'react';
 
 import FontAwesome from 'react-native-vector-icons/FontAwesome5';
 
+import * as Animatable from 'react-native-animatable';
+
 import QRCode from 'react-native-qrcode-svg';
 
 import PushNotification from 'react-native-push-notification';
@@ -27,13 +29,14 @@ import { ProgressBar } from './ProgressBar';
 import { saveToDatabase } from './Database';
 import { Globals, initGlobals } from './Globals';
 import { reportCaughtException } from './Sentry';
-import { processBlockOutputs } from './NativeCode';
+import { processBlockOutputs, makePostRequest } from './NativeCode';
 import { initBackgroundSync } from './BackgroundSync';
 import { CopyButton, OneLineText } from './SharedComponents';
 import { coinsToFiat, getCoinPriceFromAPI } from './Currency';
 
 async function init(navigation) {
     Globals.wallet.scanCoinbaseTransactions(Globals.preferences.scanCoinbaseTransactions);
+    Globals.wallet.enableAutoOptimization(Globals.preferences.autoOptimize);
 
     Globals.wallet.on('incomingtx', (transaction) => {
         sendNotification(transaction);
@@ -54,6 +57,9 @@ async function init(navigation) {
     /* TODO: iOS support */
     if (Platform.OS === 'android') {
         Globals.wallet.setBlockOutputProcessFunc(processBlockOutputs);
+        /* Override with our native makePostRequest implementation which can
+           actually cancel requests part way through */
+        Config.defaultDaemon.makePostRequest = makePostRequest;
     }
 
     initGlobals();
@@ -83,7 +89,7 @@ function handleNotification(notification) {
     notification.finish(PushNotificationIOS.FetchResult.NoData);
 }
 
-function sendNotification(transaction) {
+export function sendNotification(transaction) {
     /* Don't show notifications if disabled */
     if (!Globals.preferences.notificationsEnabled) {
         return;
@@ -98,6 +104,8 @@ function sendNotification(transaction) {
         title: 'Incoming transaction received!',
         message: `You were sent ${prettyPrintAmount(transaction.totalAmount(), Config)}`,
         data: JSON.stringify(transaction.hash),
+        largeIcon: 'ic_notification_color',
+        smallIcon: 'ic_notification_color',
     });
 }
 
@@ -317,6 +325,20 @@ class BalanceComponent extends React.Component {
         this.state = {
             expandedBalance: false,
         };
+
+        this.balanceRef = (ref) => this.balance = ref;
+        this.valueRef = (ref) => this.value = ref;
+    }
+
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.unlockedBalance !== this.props.unlockedBalance ||
+            nextProps.lockedBalance !== this.props.lockedBalance) {
+            this.balance.bounce(800);
+        }
+
+        if (nextProps.coinValue !== this.props.coinValue) {
+            this.value.bounce(800);
+        }
     }
 
     render() {
@@ -360,11 +382,16 @@ class BalanceComponent extends React.Component {
                         TOTAL BALANCE
                     </Text>
 
-                    {this.state.expandedBalance ? expandedBalance : compactBalance}
+                    <Animatable.View ref={this.balanceRef}>
+                        {this.state.expandedBalance ? expandedBalance : compactBalance}
+                    </Animatable.View>
 
-                    <Text style={{ color: this.props.screenProps.theme.slightlyMoreVisibleColour, fontSize: 20 }}>
+                    <Animatable.Text
+                        ref={this.valueRef}
+                        style={{ color: this.props.screenProps.theme.slightlyMoreVisibleColour, fontSize: 20 }}
+                    >
                         {this.props.coinValue}
-                    </Text>
+                    </Animatable.Text>
             </View>
         );
     }
@@ -386,11 +413,13 @@ class SyncComponent extends React.Component {
             progress: 0,
             percent: '0.00',
         };
+
+        this.updateSyncStatus = this.updateSyncStatus.bind(this);
+
+        this.syncRef = (ref) => this.sync = ref;
     }
 
-    tick() {
-        let [walletHeight, localHeight, networkHeight] = Globals.wallet.getSyncStatus();
-
+    updateSyncStatus(walletHeight, localHeight, networkHeight) {
         /* Since we update the network height in intervals, and we update wallet
            height by syncing, occasionaly wallet height is > network height.
            Fix that here. */
@@ -400,6 +429,10 @@ class SyncComponent extends React.Component {
 
         /* Don't divide by zero */
         let progress = networkHeight === 0 ? 0 : walletHeight / networkHeight;
+
+        if (progress > 1) {
+            progress = 1;
+        }
 
         let percent = 100 * progress;
 
@@ -413,31 +446,35 @@ class SyncComponent extends React.Component {
             percent = 99.99;
         }
 
+        const justSynced = progress === 1 && this.state.progress !== 1;
+
         this.setState({
             walletHeight,
             localHeight,
             networkHeight,
             progress,
             percent: percent.toFixed(2),
-        });
+        }, () => { if (justSynced) { this.sync.bounce(800) } });
     }
 
     componentDidMount() {
-        this.interval = setInterval(() => this.tick(), 1000);
+        Globals.wallet.on('heightchange', this.updateSyncStatus);
     }
 
     componentWillUnmount() {
-        clearInterval(this.interval);
+        if (Globals.wallet) {
+            Globals.wallet.removeListener('heightchange', this.updateSyncStatus);
+        }
     }
 
     render() {
         return(
             <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', bottom: 20, position: 'absolute', left: 0, right: 0 }}>
-                <Text style={{
+                <Animatable.Text ref={this.syncRef} style={{
                     color: this.props.screenProps.theme.slightlyMoreVisibleColour,
                 }}>
                     {this.state.walletHeight} / {this.state.networkHeight} - {this.state.percent}%
-                </Text>
+                </Animatable.Text>
                 <ProgressBar
                     progress={this.state.progress}
                     style={{justifyContent: 'flex-end', alignItems: 'center', width: 300, marginTop: 10}}
@@ -455,7 +492,7 @@ async function backgroundSave() {
     Globals.logger.addLogMessage('Saving wallet...');
 
     try {
-        await saveToDatabase(Globals.wallet, Globals.pinCode);
+        await saveToDatabase(Globals.wallet);
         Globals.logger.addLogMessage('Save complete.');
     } catch (err) {
         reportCaughtException(err);

@@ -25,8 +25,12 @@ import { DisclaimerScreen } from './DisclaimerScreen';
 import { loadPreferencesFromDatabase, openDB } from './Database';
 import { ModifyPayeeScreen, RecipientsScreen } from './Recipients';
 import { WalletOptionScreen, CreateWalletScreen } from './CreateScreen';
-import { SetPinScreen, RequestPinScreen, ForgotPinScreen } from './Pin';
 import { TransactionsScreen, TransactionDetailsScreen } from './TransactionsScreen';
+
+import {
+    SetPinScreen, RequestPinScreen, ForgotPinScreen, RequestHardwareAuthScreen,
+    ChooseAuthMethodScreen,
+} from './Authenticate';
 
 import {
     SettingsScreen, SwapCurrencyScreen, ExportKeysScreen, LoggingScreen, FaqScreen,
@@ -84,6 +88,7 @@ const TransferNavigator = createStackNavigator(
         QrScanner: QrScannerScreen,
         SendTransaction: SendTransactionScreen,
         RequestPin: RequestPinScreen,
+        RequestHardwareAuth: RequestHardwareAuthScreen,
     },
     {
         initialRouteName: 'ChoosePayee',
@@ -99,9 +104,17 @@ const TransferNavigator = createStackNavigator(
     }
 );
 
-TransferNavigator.navigationOptions = {
-    tabBarVisible: false,
-}
+TransferNavigator.navigationOptions = ({ navigation, screenProps }) => {
+    return {
+        tabBarVisible: navigation.state.index === 0, /* Only show tab bar on ChoosePayee */
+        tabBarOptions: {
+            activeBackgroundColor: screenProps.theme.backgroundColour,
+            inactiveBackgroundColor: screenProps.theme.backgroundColour,
+            activeTintColor: screenProps.theme.primaryColour,
+            inactiveTintColor: screenProps.theme.slightlyMoreVisibleColour,
+        }
+    };
+};
 
 const SettingsNavigator = createStackNavigator(
     {
@@ -112,6 +125,9 @@ const SettingsNavigator = createStackNavigator(
         Faq: FaqScreen,
         RequestPin: RequestPinScreen,
         ForgotPin: ForgotPinScreen,
+        SetPin: SetPinScreen,
+        ChooseAuthMethod: ChooseAuthMethodScreen,
+        RequestHardwareAuth: RequestHardwareAuthScreen,
     },
     {
         initialRouteName: 'Settings',
@@ -253,6 +269,12 @@ const LoginNavigator = createStackNavigator(
 
         /* Explain fee, I'm not responsible for anything, etc */
         Disclaimer: DisclaimerScreen,
+
+        /* Request authentication via fingerprint, touchid, etc */
+        RequestHardwareAuth: RequestHardwareAuthScreen,
+
+        /* Whether we should use pin, fingerprint, or no auth */
+        ChooseAuthMethod: ChooseAuthMethodScreen,
     },
     {
         initialRouteName: 'Splash',

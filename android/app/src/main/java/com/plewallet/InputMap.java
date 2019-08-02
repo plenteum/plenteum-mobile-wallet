@@ -1,4 +1,4 @@
-package com.tonchan;
+package com.plenteum.app;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.WritableArray;

@@ -1,4 +1,4 @@
-package com.tonchan;
+package com.plenteum.app;
 
 import android.app.Application;
 import android.content.Intent;
@@ -8,6 +8,8 @@ import com.facebook.react.PackageList;
 import com.facebook.hermes.reactexecutor.HermesExecutorFactory;
 import com.facebook.react.bridge.JavaScriptExecutorFactory;
 import com.facebook.react.ReactApplication;
+import com.hieuvp.fingerprint.ReactNativeFingerprintScannerPackage;
+import io.sentry.RNSentryPackage;
 import com.transistorsoft.rnbackgroundfetch.RNBackgroundFetchPackage;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
@@ -19,10 +21,7 @@ import com.google.android.gms.security.ProviderInstaller.ProviderInstallListener
 
 import java.util.List;
 
-import org.pgsqlite.SQLitePluginPackage;
-
 public class MainApplication extends Application implements ReactApplication {
-
   private final ReactNativeHost mReactNativeHost = new ReactNativeHost(this) {
     @Override
     public boolean getUseDeveloperSupport() {
@@ -34,8 +33,7 @@ public class MainApplication extends Application implements ReactApplication {
       List<ReactPackage> packages = new PackageList(this).getPackages();
       // Packages that cannot be autolinked yet can be added manually here
       packages.add(new RNBackgroundFetchPackage());
-      packages.add(new SQLitePluginPackage());
-      packages.add(new TurtleCoinPackage());
+      packages.add(new PlenteumPackage());
       return packages;
     }
 

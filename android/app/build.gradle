@@ -82,6 +82,7 @@ project.ext.react = [
 ]
 
 apply from: "../../node_modules/react-native/react.gradle"
+apply from: "../../node_modules/react-native-sentry/sentry.gradle"
 
 /**
  * Set this to true to create two separate APKs instead of one:
@@ -140,6 +141,7 @@ android {
             stl "stlport_static"
         }
         missingDimensionStrategy 'react-native-camera', 'general'
+        multiDexEnabled true
     }
     externalNativeBuild {
         ndkBuild {
@@ -208,11 +210,13 @@ android {
 }
 
 dependencies {
+    implementation project(':react-native-fingerprint-scanner')
+    implementation project(':react-native-sentry')
     implementation project(':react-native-background-fetch')
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "com.facebook.react:react-native:+"  // From node_modules
-    implementation project(':react-native-sqlite-storage')
     implementation 'com.google.android.gms:play-services-safetynet:+'
+    implementation 'com.android.support:multidex:1.0.3'
     apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
 
     if (enableHermes) {

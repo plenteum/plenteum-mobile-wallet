@@ -14,8 +14,6 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
 
-import { deleteUserPinCode } from '@haskkor/react-native-pincode';
-
 import {
     View, FlatList, Alert, Text, Linking, ScrollView, Platform
 } from 'react-native';
@@ -29,6 +27,7 @@ import Constants from './Constants';
 
 import { Styles } from './Styles';
 import { Globals } from './Globals';
+import { Authenticate } from './Authenticate';
 import { SeedComponent, CopyButton } from './SharedComponents';
 import { savePreferencesToDatabase, setHaveWallet } from './Database';
 import { navigateWithDisabledBack, toastPopUp, getArrivalTime } from './Utilities';
@@ -144,6 +143,24 @@ export class FaqScreen extends React.Component {
                         Don't worry, your balance should unlock once the transaction confirms. (Normally in {arrivalTime})
                     </Text>
 
+                    <Text style={{
+                        fontSize: 24,
+                        color: this.props.screenProps.theme.primaryColour,
+                        marginBottom: 5,
+                    }}>
+                        • What is Auto Optimization?
+                    </Text>
+
+                    <Text style={{
+                        color: this.props.screenProps.theme.slightlyMoreVisibleColour,
+                        marginBottom: 20,
+                    }}>
+                        Auto Optimization, whenever necessary, sends fusion transactions, to keep your wallet optimized.
+                        As mentioned above, your wallet is comprised of multiple 'chunks' of {Config.coinName}.{'\n\n'}
+                        Optimizing combines the chunks into fewer, larger ones. This enables you to fit more funds in one transaction.{'\n\n'}
+                        This process will result in your balance occasionally being locked - this should only last for a few minutes
+                        while the fusion transactions get added to a block, depending on how unoptimized your wallet is.
+                    </Text>
 
                 </ScrollView>
             </View>
@@ -415,7 +432,8 @@ export class SettingsScreen extends React.Component {
             scanCoinbase: Globals.preferences.scanCoinbaseTransactions,
             limitData: Globals.preferences.limitData,
             darkMode: Globals.preferences.theme === 'darkMode',
-            pinConfirmation: Globals.preferences.pinConfirmation,
+            authConfirmation: Globals.preferences.authConfirmation,
+            autoOptimize: Globals.preferences.autoOptimize,
         }
     }
 
@@ -438,14 +456,15 @@ export class SettingsScreen extends React.Component {
                                     IconType: MaterialCommunityIcons,
                                 },
                                 onClick: () => {
-                                    if (Globals.preferences.pinConfirmation) {
-                                        this.props.navigation.navigate('RequestPin', {
-                                            subtitle: 'to backup your keys',
-                                            finishFunction: () => {
+                                    if (Globals.preferences.authConfirmation) {
+                                        Authenticate(
+                                            this.props.navigation,
+                                            'to backup your keys',
+                                            () => {
                                                 this.props.navigation.dispatch(navigateWithDisabledBack('Settings'));
                                                 this.props.navigation.navigate('ExportKeys');
                                             }
-                                        });
+                                        );
                                     } else {
                                         this.props.navigation.navigate('ExportKeys');
                                     }
@@ -502,6 +521,27 @@ export class SettingsScreen extends React.Component {
                                 checked: this.state.scanCoinbase,
                             },
                             {
+                                title: 'Enable Auto Optimization',
+                                description: 'Helps sending large TXs (See FAQ)',
+                                icon: {
+                                    iconName: 'refresh',
+                                    IconType: SimpleLineIcons,
+                                },
+                                onClick: () => {
+                                    Globals.preferences.autoOptimize = !Globals.preferences.autoOptimize;
+
+                                    this.setState({
+                                        autoOptimize: Globals.preferences.autoOptimize,
+                                    });
+
+                                    Globals.wallet.enableAutoOptimization(Globals.preferences.autoOptimize);
+                                    toastPopUp(Globals.preferences.autoOptimize ? 'Auto Optimization enabled' : 'Auto Optimization disabled');
+                                    savePreferencesToDatabase(Globals.preferences);
+                                },
+                                checkbox: true,
+                                checked: this.state.autoOptimize,
+                            },
+                            {
                                 title: 'Limit data',
                                 description: 'Only sync when connected to WiFi',
                                 icon: {
@@ -516,7 +556,7 @@ export class SettingsScreen extends React.Component {
                                     });
 
                                     const netInfo = await NetInfo.fetch();
-                                    
+
                                     if (Globals.preferences.limitData && netInfo.type === 'cellular') {
                                         Globals.wallet.stop();
                                     } else {
@@ -560,42 +600,56 @@ export class SettingsScreen extends React.Component {
                                 checked: this.state.darkMode,
                             },
                             {
-                                title: 'Enable PIN confirmation',
-                                description: 'Require PIN for sensitive operations',
+                                title: 'Enable PIN/Fingerprint confirmation',
+                                description: 'Require auth for sensitive operations',
                                 icon: {
                                     iconName: 'security',
                                     IconType: MaterialCommunityIcons,
                                 },
                                 onClick: () => {
                                     /* Require pin to disable */
-                                    if (Globals.preferences.pinConfirmation) {
-                                        this.props.navigation.navigate('RequestPin', {
-                                            subtitle: 'to disable pin confirmation',
-                                            finishFunction: () => {
-                                                Globals.preferences.pinConfirmation = !Globals.preferences.pinConfirmation;
+                                    if (Globals.preferences.authConfirmation) {
+                                        Authenticate(
+                                            this.props.navigation,
+                                            'to disable PIN/Fingerprint confirmation', 
+                                            () => {
+                                                Globals.preferences.authConfirmation = !Globals.preferences.authConfirmation;
 
                                                 this.props.navigation.navigate('Settings');
 
                                                 savePreferencesToDatabase(Globals.preferences);
 
                                                 this.setState({
-                                                    pinConfirmation: Globals.preferences.pinConfirmation,
+                                                    authConfirmation: Globals.preferences.authConfirmation,
                                                 });
                                             }
-                                        });
+                                        );
                                     } else {
-                                        Globals.preferences.pinConfirmation = !Globals.preferences.pinConfirmation;
+                                        Globals.preferences.authConfirmation = !Globals.preferences.authConfirmation;
 
                                         this.setState({
-                                            pinConfirmation: Globals.preferences.pinConfirmation,
+                                            authConfirmation: Globals.preferences.authConfirmation,
                                         });
 
-                                        toastPopUp(Globals.preferences.pinConfirmation ? 'Pin Confirmation Enabled' : 'Pin Confirmation Disabled');
+                                        toastPopUp(Globals.preferences.authConfirmation ? 'Pin Confirmation Enabled' : 'Pin Confirmation Disabled');
                                         savePreferencesToDatabase(Globals.preferences);
                                     }
                                 },
                                 checkbox: true,
-                                checked: this.state.pinConfirmation,
+                                checked: this.state.authConfirmation,
+                            },
+                            {
+                                title: 'Change login method',
+                                description: 'Use Pin, Fingerprint, or No Security',
+                                icon: {
+                                    iconName: 'security',
+                                    IconType: MaterialCommunityIcons,
+                                },
+                                onClick: () => {
+                                    this.props.navigation.navigate('ChooseAuthMethod', {
+                                        nextRoute: 'Settings',
+                                    });
+                                },
                             },
                             {
                                 title: 'FAQ',
@@ -653,14 +707,15 @@ export class SettingsScreen extends React.Component {
                                     IconType: Ionicons,
                                 },
                                 onClick: () => {
-                                    if (Globals.preferences.pinConfirmation) {
-                                        this.props.navigation.navigate('RequestPin', {
-                                            subtitle: 'to resync your wallet',
-                                            finishFunction: () => {
+                                    if (Globals.preferences.authConfirmation) {
+                                        Authenticate(
+                                            this.props.navigation,
+                                            'to resync your wallet',
+                                            () => {
                                                 this.props.navigation.navigate('Settings');
                                                 resetWallet(this.props.navigation);
                                             }
-                                        });
+                                        );
                                     } else {
                                         resetWallet(this.props.navigation);
                                     }
@@ -674,14 +729,15 @@ export class SettingsScreen extends React.Component {
                                     IconType: AntDesign,
                                 },
                                 onClick: () => {
-                                    if (Globals.preferences.pinConfirmation) {
-                                        this.props.navigation.navigate('RequestPin', {
-                                            subtitle: 'to delete your wallet',
-                                            finishFunction: () => {
+                                    if (Globals.preferences.authConfirmation) {
+                                        Authenticate(
+                                            this.props.navigation,
+                                            'to delete your wallet',
+                                            () => {
                                                 this.props.navigation.navigate('Settings');
                                                 deleteWallet(this.props.navigation)
                                             }
-                                        });
+                                        );
                                     } else {
                                         deleteWallet(this.props.navigation)
                                     }
@@ -740,9 +796,6 @@ function deleteWallet(navigation) {
                 (async () => {
                     /* Disabling saving */
                     clearInterval(Globals.backgroundSaveTimer);
-
-                    /* Delete pin code */
-                    deleteUserPinCode();
 
                     await setHaveWallet(false);
 
