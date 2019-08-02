@@ -19,7 +19,7 @@ import { HeaderBackButton, StackActions } from 'react-navigation';
 
 import {
     validateAddresses, WalletErrorCode, validatePaymentID, prettyPrintAmount,
-} from 'turtlecoin-wallet-backend';
+} from 'plenteum-wallet-backend';
 
 import {
     View, Text, TextInput, TouchableWithoutFeedback, FlatList, Platform,

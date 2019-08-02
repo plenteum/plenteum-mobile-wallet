@@ -28,14 +28,14 @@ const Config = {
     walletSaveFrequency: 60 * 1000,
 
     /**
-     * The amount of decimal places your coin has, e.g. TurtleCoin has two
+     * The amount of decimal places your coin has, e.g. Plenteum has eight
      * decimals
      */
     decimalPlaces: 8,
 
     /**
      * The address prefix your coin uses - you can find this in CryptoNoteConfig.h.
-     * In TurtleCoin, this converts to PLe
+     * In Plenteum, this converts to PLe
      */
     addressPrefix: 18181,
 
@@ -200,7 +200,7 @@ const Config = {
     /**
      * Displayed in the settings screen
      */
-    appVersion: 'v1.0.0',
+    appVersion: 'v0.1.0',
 
     /**
      * Base URL for us to chuck a hash on the end, and find a transaction
@@ -215,6 +215,7 @@ const Config = {
 
     /**
      * A link to your app on the google play store
+     * Also not released yet, but linking to old wallet
      */
     googlePlayLink: 'https://play.google.com/store/apps/details?id=com.plenteum.wallet',
 };

@@ -8,10 +8,10 @@ import * as _ from 'lodash';
 
 import Config from './Config';
 
-/* Manually comparing to TurtleCoin to try and prevent getting errors reported
+/* Manually comparing to Plenteum to try and prevent getting errors reported
    for forks... */
 /* DO NOT CHANGE THIS LINE WITHOUT ALSO ALTERING THE Sentry.config() LINE - See readme and sentry docs. */
-const sentryIsEnabled = !__DEV__ && Config.coinName === 'TurtleCoin';
+const sentryIsEnabled = !__DEV__ && Config.coinName === 'Plenteum';
 
 export function reportCaughtException(err) {
     /* Sentry doesn't properly report arbitary objects. Convert to string if
@@ -31,7 +31,7 @@ export function reportCaughtException(err) {
 export function initSentry() {
     if (sentryIsEnabled) {
         /* CHANGE THIS IF YOU ARE FORKING! */
-        Sentry.config('https://8ecf138e1d1e4d558178be3f2b5e1925@sentry.io/1411753').install();
+        Sentry.config('https://4d0fab85bb9b4fbf9f6669526aae63f2@sentry.io/1520263').install();
         Sentry.setVersion(Config.appVersion);
         Sentry.setDataCallback((event) => {
             console.log(event);

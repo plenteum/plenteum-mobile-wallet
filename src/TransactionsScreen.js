@@ -333,9 +333,9 @@ class TransactionList extends React.Component {
 
     getIconColour(transaction) {
         if (transaction.totalAmount() >= 0) {
-            /* Intentionally using the TurtleCoin green here, instead of the
+            /* Intentionally using the Plenteum blue here, instead of the
                theme colour - we want green/red, not to change based on theme */
-            return '#40C18E';
+            return '#007bff';
         }
 
         return 'red';

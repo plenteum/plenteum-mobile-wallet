@@ -10,9 +10,9 @@ export const Themes = {
         backgroundColour: 'white',
 
         /**
-         * The primary colour used by the wallet, for TurtleCoin this is green
+         * The primary colour used by the wallet, for Plenteum this is green
          */
-        primaryColour: '#40C18E',
+        primaryColour: '#007bff',
 
         /**
          * Colour for the background circles on the pin page
@@ -23,7 +23,7 @@ export const Themes = {
          * Colour for the pin code numbers
          * Note that when you click them, a different theme is applied.
          */
-        pinCodeForegroundColour: '#40C18E',
+        pinCodeForegroundColour: '#007bff',
 
         /**
          * We chose to use a darker green here. It is very rarely used.
@@ -78,9 +78,9 @@ export const Themes = {
         backgroundColour: '#2C2F33',
 
         /**
-         * The primary colour used by the wallet, for TurtleCoin this is green
+         * The primary colour used by the wallet, for Plenteum this is green
          */
-        primaryColour: '#40C18E',
+        primaryColour: '#007bff',
 
         /**
          * Colour for the background circles on the pin page
