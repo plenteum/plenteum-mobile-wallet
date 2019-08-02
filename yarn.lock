@@ -7542,33 +7542,33 @@ tunnel-agent@^0.6.0:
   dependencies:
     safe-buffer "^5.0.1"
 
-turtlecoin-crypto@^3.0.3:
+plenteum-crypto@^3.0.3:
   version "3.0.3"
-  resolved "https://registry.yarnpkg.com/turtlecoin-crypto/-/turtlecoin-crypto-3.0.3.tgz#91618ab9cbb3c126c225f51a7f15007795688739"
+  resolved "https://registry.yarnpkg.com/plenteum-crypto/-/plenteum-crypto-3.0.3.tgz#91618ab9cbb3c126c225f51a7f15007795688739"
   integrity sha512-2igdsN2R3/45UAIIWrdJjHsGA9UAwe0dftbaOlCDdCDVxlup/eoXSoA1IuK9QZa14eDgF/joZHboA0b+AaUkpA==
   dependencies:
     bindings "^1.5.0"
     nan "^2.14.0"
 
-turtlecoin-rpc@^1.0.0:
+plenteum-rpc@^1.0.0:
   version "1.0.1"
-  resolved "https://registry.yarnpkg.com/turtlecoin-rpc/-/turtlecoin-rpc-1.0.1.tgz#d41a3ff904ed8437cf8f67b1c10fb9e27ae0b932"
+  resolved "https://registry.yarnpkg.com/plenteum-rpc/-/plenteum-rpc-1.0.1.tgz#d41a3ff904ed8437cf8f67b1c10fb9e27ae0b932"
   integrity sha512-3U0FDbbM3+Es/Asd6QwQY/WWrVWknhyxEFfFuuBYd2KBncfqdQXoxzjLMGIOSSiCSl4PdFIxhxEaKY/EfQGKmw==
   dependencies:
     bindings "^1.5.0"
     nan "^2.14.0"
 
-turtlecoin-rpc@^1.0.0:
+plenteum-rpc@^1.0.0:
   version "1.0.0"
-  resolved "https://registry.yarnpkg.com/turtlecoin-rpc/-/turtlecoin-rpc-1.0.0.tgz#1225153fd1a77b2ea95ac621a3a8b726ea4fe989"
+  resolved "https://registry.yarnpkg.com/plenteum-rpc/-/plenteum-rpc-1.0.0.tgz#1225153fd1a77b2ea95ac621a3a8b726ea4fe989"
   integrity sha512-w1Sm19vfPSCglpMFG6L1abTRNJhwHCbl4MxTQLYjSN9SFYS6n9JWk5840+1zV9UGc7lwQ1xh+OFk5tVjqp8ysw==
   dependencies:
     request "^2.88.0"
     request-promise-native "^1.0.7"
 
-turtlecoin-utils@^1.0.2:
+plenteum-utils@^1.0.2:
   version "1.0.2"
-  resolved "https://registry.yarnpkg.com/turtlecoin-utils/-/turtlecoin-utils-1.0.2.tgz#353f6a38d750ead55ee2f694243c9cfd4512135d"
+  resolved "https://registry.yarnpkg.com/plenteum-utils/-/plenteum-utils-1.0.2.tgz#353f6a38d750ead55ee2f694243c9cfd4512135d"
   integrity sha512-j1lce2MhqerG/c3FthqoNxb1COBrBeLJxCqfY18ji7UcTTRoKO9OlPElnrIjzQtOaN6OZEFoDeNqjqtNjng/aw==
   dependencies:
     crc "^3.8.0"
@@ -7577,18 +7577,18 @@ turtlecoin-utils@^1.0.2:
     secure-random-string "^1.1.0"
     varint "^5.0.0"
   optionalDependencies:
-    turtlecoin-crypto "^3.0.3"
+    plenteum-crypto "^3.0.3"
 
-turtlecoin-wallet-backend@^3.4.1:
+plenteum-wallet-backend@^3.4.1:
   version "3.4.1"
-  resolved "https://registry.yarnpkg.com/turtlecoin-wallet-backend/-/turtlecoin-wallet-backend-3.4.1.tgz#71ba1ceb4560d122342696b809b11c6ca719cebb"
+  resolved "https://registry.yarnpkg.com/plenteum-wallet-backend/-/plenteum-wallet-backend-3.4.1.tgz#71ba1ceb4560d122342696b809b11c6ca719cebb"
   integrity sha512-dMPCO9kHakEUN6vhR+QBP722sVqAu2y4XxvtT129BHXiuWsHZX5bIbxXuEpopU+87GhgsDQnnBYi2CA5P3d1Uw==
   dependencies:
     lodash "^4.17.14"
     object-sizeof "^1.4.0"
     pbkdf2 "^3.0.17"
-    turtlecoin-rpc "^1.0.0"
-    turtlecoin-utils "^1.0.2"
+    plenteum-rpc "^1.0.0"
+    plenteum-utils "^1.0.2"
 
 tweetnacl@^0.14.3, tweetnacl@~0.14.0:
   version "0.14.5"

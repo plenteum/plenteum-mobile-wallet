@@ -1,5 +1,5 @@
 {
-  "name": "TonChan",
+  "name": "PleWallet",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -51,7 +51,7 @@
     "readable-stream": "1.0.33",
     "rn-nodeify": "^10.0.1",
     "stream-browserify": "^1.0.0",
-    "turtlecoin-wallet-backend": "^3.4.1",
+    "plenteum-wallet-backend": "^3.4.1",
     "url": "~0.10.1",
     "vm-browserify": "0.0.4"
   },

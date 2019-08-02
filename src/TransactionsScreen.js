@@ -10,7 +10,7 @@ import TextTicker from 'react-native-text-ticker';
 
 import { Header } from 'react-native-elements';
 import { View, Text, FlatList, Button, Linking, ScrollView } from 'react-native';
-import { prettyPrintAmount } from 'turtlecoin-wallet-backend';
+import { prettyPrintAmount } from 'plenteum-wallet-backend';
 
 import Config from './Config';
 import ListItem from './ListItem';

@@ -8,7 +8,7 @@ import {
     View, Text, Button, Image,
 } from 'react-native';
 
-import { WalletBackend } from 'turtlecoin-wallet-backend';
+import { WalletBackend } from 'plenteum-wallet-backend';
 
 import Config from './Config';
 

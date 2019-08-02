@@ -4,7 +4,7 @@
 
 import { Platform } from 'react-native';
 
-import { MixinLimit, MixinLimits, Daemon } from 'turtlecoin-wallet-backend';
+import { MixinLimit, MixinLimits, Daemon } from 'plenteum-wallet-backend';
 
 import {
     derivePublicKey, generateKeyDerivation, generateRingSignatures,
@@ -35,7 +35,7 @@ const Config = {
 
     /**
      * The address prefix your coin uses - you can find this in CryptoNoteConfig.h.
-     * In TurtleCoin, this converts to TRTL
+     * In TurtleCoin, this converts to PLe
      */
     addressPrefix: 18181,
 
@@ -163,7 +163,7 @@ const Config = {
     /**
      * Address to send dev fee to
      */
-    devFeeAddress: 'TRTLv1E3ThL66fHthRHyzPSDqeUazPA9eBQYkuRnp8svKgvdoecQtqhSRaD59CEuH8XnYsw3YGtw1RWsQSqtHLqUXu4tvk9LryR',
+    devFeeAddress: 'PLearxtECBsKFLLeX3edPMEk4ncvZGkJQ7FpPyG3ADGtYbFj7FC5ELWXS2B7wRDfjwSqEwZVp7pwjbWCAhmGJp7z94TQzpNUkP',
 
     /**
      * Base url for price API

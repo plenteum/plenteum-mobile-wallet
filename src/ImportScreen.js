@@ -13,7 +13,7 @@ import {
 import {
     importWalletFromSeed, BlockchainCacheApi, WalletBackend, WalletError,
     isValidMnemonic, isValidMnemonicWord,
-} from 'turtlecoin-wallet-backend';
+} from 'plenteum-wallet-backend';
 
 import Config from './Config';
 

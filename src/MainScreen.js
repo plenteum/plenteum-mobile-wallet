@@ -17,7 +17,7 @@ import {
     AppState, Platform, Linking, ScrollView, RefreshControl, Dimensions,
 } from 'react-native';
 
-import { prettyPrintAmount, LogLevel } from 'turtlecoin-wallet-backend';
+import { prettyPrintAmount, LogLevel } from 'plenteum-wallet-backend';
 
 import Config from './Config';
 

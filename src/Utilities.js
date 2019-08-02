@@ -12,7 +12,7 @@ import { StackActions, NavigationActions } from 'react-navigation';
 
 import {
     validateAddresses, WalletErrorCode, validatePaymentID, prettyPrintAmount,
-} from 'turtlecoin-wallet-backend';
+} from 'plenteum-wallet-backend';
 
 import * as Qs from 'query-string';
 
@@ -128,7 +128,7 @@ export function handleURI(data, navigation) {
 export function parseURI(qrData) {
     /* It's a URI, try and get the data from it */
     if (qrData.startsWith(Config.uriPrefix)) {
-        /* Remove the turtlecoin:// prefix */
+        /* Remove the plenteum:// prefix */
         let data = qrData.replace(Config.uriPrefix, '');
         let index = data.indexOf('?');
 

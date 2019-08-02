@@ -1,8 +1,8 @@
 platform :ios, '9.0'
 require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
 
-target 'TonChan' do
-  # Pods for TonChan
+target 'PleWallet' do
+  # Pods for PleWallet
   pod 'React', :path => '../node_modules/react-native/'
   pod 'React-Core', :path => '../node_modules/react-native/React'
   pod 'React-DevSupport', :path => '../node_modules/react-native/React'
@@ -37,7 +37,7 @@ target 'TonChan' do
 
   pod 'ReactNativePermissions', :path => '../node_modules/react-native-permissions'
 
-  target 'TonChanTests' do
+  target 'PleWalletTests' do
     inherit! :search_paths
     # Pods for testing
   end
@@ -45,10 +45,10 @@ target 'TonChan' do
   use_native_modules!
 end
 
-target 'TonChan-tvOS' do
-  # Pods for TonChan-tvOS
+target 'PleWallet-tvOS' do
+  # Pods for PleWallet-tvOS
 
-  target 'TonChan-tvOSTests' do
+  target 'PleWallet-tvOSTests' do
     inherit! :search_paths
     # Pods for testing
   end

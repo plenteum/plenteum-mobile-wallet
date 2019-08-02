@@ -12,7 +12,7 @@ import {
 
 import {
     validateAddresses, WalletErrorCode, validatePaymentID,
-} from 'turtlecoin-wallet-backend';
+} from 'plenteum-wallet-backend';
 
 import { Button as RNEButton, Alert } from 'react-native';
 
