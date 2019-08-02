@@ -103,6 +103,12 @@ export default Constants = {
             symbol: '$',
             symbolLocation: 'prefix',
         },
+        {
+            ticker: 'zar',
+            coinName: 'South African Rand',
+            symbol: 'R',
+            symbolLocation: 'prefix',
+        },
     ],
 
     numTransactionsPerPage: 20,
