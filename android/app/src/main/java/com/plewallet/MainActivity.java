@@ -1,4 +1,4 @@
-package com.plenteum.app;
+package com.plewallet;
 
 import com.facebook.react.ReactActivity;
 

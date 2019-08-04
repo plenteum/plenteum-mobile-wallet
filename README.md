@@ -1,7 +1,7 @@
 # PleWallet - A mobile, native Plenteum wallet
 
 ### Initial Setup
-
+* git clone https://github.com/plenteum/plenteum-mobile-wallet
 * cd plenteum-mobile-wallet
 * yarn install
 

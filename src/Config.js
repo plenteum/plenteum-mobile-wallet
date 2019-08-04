@@ -178,7 +178,7 @@ const Config = {
      * Default daemon to use. Can either be a BlockchainCacheApi(baseURL, SSL),
      * or a ConventionalDaemon(url, port).
      */
-    defaultDaemon: new BlockchainCacheApi('cache-api.pleapps.plenteum.com', true),
+    defaultDaemon: new BlockchainCacheApi('cache.pleapps.plenteum.com', true),
 
     /**
      * A link to where a bug can be reported for your wallet. Please update
@@ -205,7 +205,7 @@ const Config = {
     /**
      * Base URL for us to chuck a hash on the end, and find a transaction
      */
-    explorerBaseURL: 'http://block-explorer.plenteum.com/?hash='
+    explorerBaseURL: 'http://block-explorer.plenteum.com/?hash=',
 
     /**
      * A link to your app on the Apple app store. Currently blank because we

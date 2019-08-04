@@ -6187,9 +6187,9 @@ react-native-exit-app@^1.0.0:
   resolved "https://registry.yarnpkg.com/react-native-exit-app/-/react-native-exit-app-1.0.0.tgz#a2fbb121d902e6967cd8a365fe8453e5c4bc3172"
   integrity sha512-2d8RlzfjA4fTJaXD3xObTt0hv+7i41bDyWDB9+zOI0zS1nGvY4mtENKhte8ceRih/3eZWQLpwkkHFP1Y8AG/5w==
 
-"react-native-fingerprint-scanner@https://github.com/hieuvp/react-native-fingerprint-scanner#update/rn-60":
+"react-native-fingerprint-scanner@git+https://github.com/hieuvp/react-native-fingerprint-scanner.git#update/rn-60":
   version "2.6.1"
-  resolved "https://github.com/hieuvp/react-native-fingerprint-scanner#7515eacac763e77d0f1c3137623edd5d29676af7"
+  resolved "git+https://github.com/hieuvp/react-native-fingerprint-scanner.git#7515eacac763e77d0f1c3137623edd5d29676af7"
 
 react-native-gesture-handler@^1.3.0:
   version "1.3.0"

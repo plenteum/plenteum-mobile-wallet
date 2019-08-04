@@ -1,4 +1,4 @@
-package com.plenteum.app;
+package com.plewallet;
 
 import android.app.Application;
 import android.content.Intent;
