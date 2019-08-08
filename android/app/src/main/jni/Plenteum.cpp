@@ -85,7 +85,7 @@ extern "C" jint JNI_OnLoad(JavaVM *vm, void *reserved) {
 }
 
 extern "C" JNIEXPORT jobjectArray JNICALL
-Java_com_plenteum_app_PlenteumModule_processBlockOutputsJNI(
+Java_com_plewallet_PlenteumModule_processBlockOutputsJNI(
     JNIEnv *env,
     jobject instance,
     jobject jWalletBlockInfo,
@@ -107,7 +107,7 @@ Java_com_plenteum_app_PlenteumModule_processBlockOutputsJNI(
 }
 
 extern "C" JNIEXPORT jobjectArray JNICALL
-Java_com_plenteum_app_PlenteumModule_generateRingSignaturesJNI(
+Java_com_plewallet_PlenteumModule_generateRingSignaturesJNI(
     JNIEnv *env,
     jobject instance,
     jstring jPrefixHash,
@@ -129,7 +129,7 @@ Java_com_plenteum_app_PlenteumModule_generateRingSignaturesJNI(
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_plenteum_app_PlenteumModule_generateKeyDerivationJNI(
+Java_com_plewallet_PlenteumModule_generateKeyDerivationJNI(
     JNIEnv *env,
     jobject instance,
     jstring jTransactionPublicKey,
@@ -146,7 +146,7 @@ Java_com_plenteum_app_PlenteumModule_generateKeyDerivationJNI(
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_plenteum_app_PlenteumModule_generateKeyImageJNI(
+Java_com_plewallet_PlenteumModule_generateKeyImageJNI(
     JNIEnv *env,
     jobject instance,
     jstring jPublicEphemeral,
@@ -163,7 +163,7 @@ Java_com_plenteum_app_PlenteumModule_generateKeyImageJNI(
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_plenteum_app_PlenteumModule_deriveSecretKeyJNI(
+Java_com_plewallet_PlenteumModule_deriveSecretKeyJNI(
     JNIEnv *env,
     jobject instance,
     jstring jDerivation,
@@ -181,7 +181,7 @@ Java_com_plenteum_app_PlenteumModule_deriveSecretKeyJNI(
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_plenteum_app_PlenteumModule_derivePublicKeyJNI(
+Java_com_plewallet_PlenteumModule_derivePublicKeyJNI(
     JNIEnv *env,
     jobject instance,
     jstring jDerivation,

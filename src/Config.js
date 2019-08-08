@@ -153,7 +153,7 @@ const Config = {
      * should be equal to your current block count. If it's significantly different,
      * you can offset your timestamp to fix the discrepancy
      */
-    chainLaunchTimestamp: new Date(1000 * 1513031505),
+    chainLaunchTimestamp: new Date(1000 * 1533106800),
 
     /**
      * Fee to take on all transactions, in percentage
@@ -178,7 +178,7 @@ const Config = {
      * Default daemon to use. Can either be a BlockchainCacheApi(baseURL, SSL),
      * or a ConventionalDaemon(url, port).
      */
-    defaultDaemon: new BlockchainCacheApi('cache.pleapps.plenteum.com', true),
+    defaultDaemon: new Daemon('cache.pleapps.plenteum.com', 443),
 
     /**
      * A link to where a bug can be reported for your wallet. Please update
