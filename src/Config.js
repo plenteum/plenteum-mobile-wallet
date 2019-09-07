@@ -11,7 +11,7 @@ import {
     deriveSecretKey, generateKeyImage,
 } from './NativeCode';
 
-const Config = {
+const Config = new function() {
     /**
      * If you can't figure this one out, I don't have high hopes
      */
@@ -25,7 +25,7 @@ const Config = {
     /**
      * How often to save the wallet, in milliseconds
      */
-    walletSaveFrequency: 60 * 1000,
+    this.walletSaveFrequency = 60 * 1000;
 
     /**
      * The amount of decimal places your coin has, e.g. Plenteum has eight
@@ -42,7 +42,7 @@ const Config = {
     /**
      * Request timeout for daemon operations in milliseconds
      */
-    requestTimeout: 10 * 1000,
+    this.requestTimeout = 10 * 1000;
 
     /**
      * The block time of your coin, in seconds
@@ -52,7 +52,7 @@ const Config = {
     /**
      * How often to process blocks, in millseconds
      */
-    syncThreadInterval: 4,
+    this.syncThreadInterval = 4;
 
     /**
      * How often to update the daemon info, in milliseconds
@@ -69,7 +69,7 @@ const Config = {
      * high a value will cause the event loop to be blocked, and your interaction
      * to be laggy.
      */
-    blocksPerTick: 1,
+    this.blocksPerTick = 1;
 
     /**
      * Your coins 'ticker', generally used to refer to the coin, i.e. 123 PLE
@@ -80,7 +80,7 @@ const Config = {
      * Most people haven't mined any blocks, so lets not waste time scanning
      * them
      */
-    scanCoinbaseTransactions: false,
+    this.scanCoinbaseTransactions = false;
 
     /**
      * The minimum fee allowed for transactions, in ATOMIC units
@@ -113,37 +113,37 @@ const Config = {
     /**
      * Use our native func instead of JS slowness
      */
-    derivePublicKey: Platform.OS === 'ios' ? undefined : derivePublicKey,
+    this.derivePublicKey = Platform.OS === 'ios' ? undefined : derivePublicKey;
 
     /**
      * Use our native func instead of JS slowness
      */
-    generateKeyDerivation: Platform.OS === 'ios' ? undefined : generateKeyDerivation,
+    this.generateKeyDerivation = Platform.OS === 'ios' ? undefined : generateKeyDerivation;
 
     /**
      * Use our native func instead of JS slowness
      */
-    generateRingSignatures: Platform.OS === 'ios' ? undefined : generateRingSignatures,
+    this.generateRingSignatures = Platform.OS === 'ios' ? undefined : generateRingSignatures;
 
     /**
      * Use our native func instead of JS slowness
      */
-    deriveSecretKey: Platform.OS === 'ios' ? undefined : deriveSecretKey,
+    this.deriveSecretKey = Platform.OS === 'ios' ? undefined : deriveSecretKey;
 
     /**
      * Use our native func instead of JS slowness
      */
-    generateKeyImage: Platform.OS === 'ios' ? undefined : generateKeyImage,
+    this.generateKeyImage = Platform.OS === 'ios' ? undefined : generateKeyImage;
 
     /**
      * Memory to use for storing downloaded blocks - 3MB
      */
-    blockStoreMemoryLimit: 1024 * 1024 * 3,
+    this.blockStoreMemoryLimit = 1024 * 1024 * 3;
 
     /**
      * Amount of blocks to request from the daemon at once
      */
-    blocksPerDaemonRequest: 100,
+    this.blocksPerDaemonRequest = 100;
 
     /**
      * Unix timestamp of the time your chain was launched.
@@ -172,7 +172,7 @@ const Config = {
      * you just set this to an empty string. If you have another API you want
      * it to support, you're going to have to modify the code in Currency.js.
      */
-    priceApiLink: 'https://api.coingecko.com/api/v3/simple/price',
+    this.priceApiLink = 'https://api.coingecko.com/api/v3/simple/price';
 
     /**
      * Default daemon to use. Can either be a BlockchainCacheApi(baseURL, SSL),
@@ -191,6 +191,11 @@ const Config = {
      * This only controls the name in the settings screen.
      */
     appName: 'PleWallet',
+
+    /** 
+     * Customer user agent string for wallet backend requests
+     */
+    this.customUserAgentString = this.appName.toLowerCase() + '-da-greatest!';
 
     /**
      * Slogan phrase during wallet CreateScreen
@@ -211,13 +216,13 @@ const Config = {
      * A link to your app on the Apple app store. Currently blank because we
      * haven't released for iOS yet...
      */
-    appStoreLink: '',
+    this.appStoreLink = '';
 
     /**
      * A link to your app on the google play store
      * Also not released yet, but linking to old wallet
      */
-    googlePlayLink: 'https://play.google.com/store/apps/details?id=com.plenteum.wallet',
+    googlePlayLink: 'https://play.google.com/store/apps/details?id=com.plewallett',
 };
 
 module.exports = Config;
