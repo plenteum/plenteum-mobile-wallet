@@ -10,9 +10,9 @@ export const Themes = {
         backgroundColour: 'white',
 
         /**
-         * The primary colour used by the wallet, for Plenteum this is green
+         * The primary colour used by the wallet, for Plenteum this is blue
          */
-        primaryColour: '#007bff',
+        primaryColour: '#0076a8',
 
         /**
          * Colour for the background circles on the pin page
@@ -23,12 +23,12 @@ export const Themes = {
          * Colour for the pin code numbers
          * Note that when you click them, a different theme is applied.
          */
-        pinCodeForegroundColour: '#007bff',
+        pinCodeForegroundColour: '#0076a8',
 
         /**
          * We chose to use a darker green here. It is very rarely used.
          */
-        secondaryColour: '#00853D',
+        secondaryColour: '#369fcc',
 
         /**
          * Terrible name, lol. This is used things which shouldn't pop out
@@ -75,12 +75,12 @@ export const Themes = {
         /**
          * Background colour for every component
          */
-        backgroundColour: '#2C2F33',
+        backgroundColour: '#2d2d2d',
 
         /**
          * The primary colour used by the wallet, for Plenteum this is green
          */
-        primaryColour: '#007bff',
+        primaryColour: '#0076a8',
 
         /**
          * Colour for the background circles on the pin page
@@ -96,7 +96,7 @@ export const Themes = {
         /**
          * We chose to use a darker green here. It is very rarely used.
          */
-        secondaryColour: '#00853D',
+        secondaryColour: '#369fcc',
 
         /**
          * Terrible name, lol. This is used things which shouldn't pop out
